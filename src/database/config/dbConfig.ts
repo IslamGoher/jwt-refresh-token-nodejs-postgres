@@ -1,4 +1,6 @@
 import { Pool, Client, ConnectionConfig } from "pg";
+import { UserModel } from "../models/user";
+import { RefreshTokenModel } from "../models/refreshToken";
 
 export class Database {
   private static pool = new Pool({
@@ -9,13 +11,18 @@ export class Database {
     connectionString: process.env.DB_CLIENT_URL,
   });
 
+  public static async query(queryText: string, values?: any[] | undefined, raw = true) {
+    const result = await this.pool.query(queryText, values);
+    return (raw) ? result.rows : result;
+  }
+
   private static async createDatabase() {
     try {
       await this.client.connect();
 
       const dbName = process.env.DB_NAME;
       const response = await this.client.query(
-        `SELECT 1 FROM pg_database WHERE datname=${dbName};`
+        `SELECT 1 FROM pg_database WHERE datname='${dbName}';`
       );
 
       if (response.rowCount !== 1) {
@@ -31,18 +38,19 @@ export class Database {
 
   private static async createTables() {
     try {
-      
+      await this.pool.connect();
+
+      await UserModel.createTable();
+      await RefreshTokenModel.createTable();
+
+      console.log("database tables created");
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   }
 
   public static async init() {
-    // connect to client
-    // create database
-    // disconnect the client
-    // connect to pool
-    // create tables
-    // return pool
+    await this.createDatabase();
+    await this.createTables();
   }
 }
