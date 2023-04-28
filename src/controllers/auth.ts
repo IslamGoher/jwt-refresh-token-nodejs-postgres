@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 
 export class AuthController {
-  public static async signIn(req: Request, res: Response) {
+  public static async register(req: Request, res: Response) {
     
   }
 }

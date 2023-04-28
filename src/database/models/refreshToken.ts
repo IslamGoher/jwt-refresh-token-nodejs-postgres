@@ -1,4 +1,5 @@
 import { Database } from "../config/dbConfig";
+import { RefreshTokenType } from "../types/types";
 
 export class RefreshTokenModel {
   public static async createTable() {
@@ -9,5 +10,21 @@ export class RefreshTokenModel {
         expireDate TIMESTAMP NOT NULL
       );
     `);
+  }
+
+  public static async create(refreshTokenData: RefreshTokenType): Promise<RefreshTokenType> {
+    return await Database.query<RefreshTokenType>(
+      `
+        INSERT INTO
+          Users(userID, token, expireDate)
+          VALUES($1, $2, $3)
+        RETURNING *;
+      `,
+      [
+        refreshTokenData.userID,
+        refreshTokenData.token,
+        refreshTokenData.expireDate
+      ]
+    );
   }
 }

@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
     "pg": "^8.10.0",
     "tsc": "^2.0.4",
     "uuid": "^9.0.0"
@@ -15,6 +16,7 @@
   "main": "src/app.ts",
   "devDependencies": {
     "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^18.16.1",
     "@types/pg": "^8.6.6",
     "@types/uuid": "^9.0.1",

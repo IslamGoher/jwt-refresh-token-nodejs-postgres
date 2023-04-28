@@ -11,9 +11,14 @@ export class Database {
     connectionString: process.env.DB_CLIENT_URL,
   });
 
-  public static async query(queryText: string, values?: any[] | undefined, raw = true) {
+  public static async query<Type>(
+    queryText: string,
+    values?: any[] | undefined,
+    raw = true
+  ): Promise<Type[] | any> {
     const result = await this.pool.query(queryText, values);
-    return (raw) ? result.rows : result;
+    const rows: Type[] = result.rows;
+    return raw ? rows : result;
   }
 
   private static async createDatabase() {
