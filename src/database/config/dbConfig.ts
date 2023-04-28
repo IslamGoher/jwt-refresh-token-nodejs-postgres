@@ -11,8 +11,9 @@ export class Database {
     connectionString: process.env.DB_CLIENT_URL,
   });
 
-  public static async query(queryText: string, values?: any[] | undefined) {
-    return await this.pool.query(queryText, values);
+  public static async query(queryText: string, values?: any[] | undefined, raw = true) {
+    const result = await this.pool.query(queryText, values);
+    return (raw) ? result.rows : result;
   }
 
   private static async createDatabase() {
@@ -21,7 +22,7 @@ export class Database {
 
       const dbName = process.env.DB_NAME;
       const response = await this.client.query(
-        `SELECT 1 FROM pg_database WHERE datname=${dbName};`
+        `SELECT 1 FROM pg_database WHERE datname='${dbName}';`
       );
 
       if (response.rowCount !== 1) {
