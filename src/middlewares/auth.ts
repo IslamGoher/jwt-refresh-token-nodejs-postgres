@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { sign, verify } from "jsonwebtoken";
 
 export class AuthMiddleware {
-  public static async isVerified(
+  public static async isAccessTokenVerified(
     req: Request | any,
     res: Response,
     next: NextFunction
