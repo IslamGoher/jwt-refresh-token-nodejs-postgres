@@ -1,12 +1,12 @@
 export interface UserType {
-  userID?: number;
+  user_id?: number;
   name?: string;
   email?: string;
   password?: string;
 }
 
 export interface RefreshTokenType {
-  userID?: number;
+  user_id?: number;
   token?: string;
-  expireDate?: Date;
+  expire_date?: Date;
 }
