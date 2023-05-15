@@ -5,7 +5,7 @@ export class RefreshTokenModel {
   public static async createTable() {
     await Database.query(`
       CREATE TABLE IF NOT EXISTS refresh_tokens(
-        token PRIMARY KEY VARCHAR NOT NULL,
+        token VARCHAR PRIMARY KEY NOT NULL,
         user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
         expire_date TIMESTAMP NOT NULL
       );
@@ -32,12 +32,13 @@ export class RefreshTokenModel {
     )[0];
   }
 
-  public static async getOneByUserID(
-    userID: number
+  public static async getOneByUserIDAndToken(
+    userID: number,
+    token: string
   ): Promise<RefreshTokenType | null> {
     const refreshToken = await Database.query<RefreshTokenType>(
-      "SELECT * FROM refresh_tokens WHERE user_id = $1",
-      [userID]
+      "SELECT * FROM refresh_tokens WHERE user_id = $1 AND token = $2;",
+      [userID, token]
     );
     return refreshToken[0];
   }
