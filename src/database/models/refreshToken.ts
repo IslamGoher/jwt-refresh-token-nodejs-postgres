@@ -5,8 +5,8 @@ export class RefreshTokenModel {
   public static async createTable() {
     await Database.query(`
       CREATE TABLE IF NOT EXISTS refresh_tokens(
+        token PRIMARY KEY VARCHAR NOT NULL,
         user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
-        token VARCHAR NOT NULL,
         expire_date TIMESTAMP NOT NULL
       );
     `);
