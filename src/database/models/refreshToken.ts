@@ -42,4 +42,11 @@ export class RefreshTokenModel {
     );
     return refreshToken[0];
   }
+
+  public static async deleteUserRefreshTokens(user_id: number) {
+    await Database.query<RefreshTokenType>(
+      "DELETE FROM refresh_tokens WHERE user_id = $1;",
+      [user_id]
+      );
+  }
 }
