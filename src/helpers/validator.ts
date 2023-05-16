@@ -3,9 +3,9 @@ import Joi from "joi";
 export class Validator {
   public static validateLoginReqData(reqData: object) {
     const joiSchema = Joi.object({
-      name: Joi.string(),
-      email: Joi.string().email(),
-      password: Joi.string().min(8),
+      name: Joi.string().required(),
+      email: Joi.string().email().required(),
+      password: Joi.string().min(8).required(),
     });
     const validationResult = joiSchema.validate(reqData);
 
