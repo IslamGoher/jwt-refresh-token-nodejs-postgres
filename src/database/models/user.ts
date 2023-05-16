@@ -27,4 +27,13 @@ export class UserModel {
       [userData.name, userData.email, userData.password]
     ))[0];
   }
+
+  public static async getUserByEmail(email: string): Promise<UserType> {
+    const user: UserType[] = await Database.query<UserType>(
+      "SELECT * FROM users WHERE email = $1;",
+      [email]
+    );
+
+    return user[0];
+  }
 }
