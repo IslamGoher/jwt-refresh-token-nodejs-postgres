@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { loginDTO } from "../types/auth";
+import { loginDTO, registerDTO } from "../types/auth";
 import { Validator } from "../helpers/validator";
 import { UserModel } from "../database/models/user";
 import { compare } from "bcrypt";
@@ -36,12 +36,11 @@ export class AuthController {
           message: "invalid password",
         });
 
-      const refreshToken = await AuthService.createRefreshToken(
-        currentUser.user_id!
+      const { refreshToken, accessToken } = await AuthService.createUserTokens(
+        currentUser
       );
-      const accessToken = AuthService.createAccessToken(currentUser);
 
-      res.cookie("rToken", refreshToken, {
+      res.cookie("rtoken", refreshToken, {
         httpOnly: true,
         sameSite: "strict",
       });
@@ -51,7 +50,6 @@ export class AuthController {
         message: "user successfully login",
         token: accessToken,
       });
-
     } catch (error) {
       console.log(error);
       return res.json({
@@ -59,5 +57,41 @@ export class AuthController {
         message: "server error",
       });
     }
+  }
+
+  public static async register(req: Request, res: Response) {
+    const reqData: registerDTO = req.body;
+    const validationResult = Validator.validateRegisterReqData(reqData);
+
+    if (!validationResult.status)
+      return res.json({
+        status: 400,
+        message: validationResult.message,
+      });
+
+    const currentUser = await UserModel.getUserByEmail(reqData.email);
+
+    if (currentUser)
+      return res.json({
+        status: 409,
+        message: "this email already exists",
+      });
+
+    const newUser = await UserModel.create(reqData);
+
+    const { refreshToken, accessToken } = await AuthService.createUserTokens(
+      newUser
+    );
+
+    res.cookie("rtoken", refreshToken, {
+      httpOnly: true,
+      sameSite: "strict",
+    });
+
+    return res.json({
+      status: 200,
+      message: "user successfully registered",
+      token: accessToken,
+    });
   }
 }
