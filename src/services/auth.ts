@@ -43,7 +43,17 @@ export class AuthService {
 
   public static createAccessToken(userData: UserType): string {
     const jwtSecret = process.env.JWT_SECRET!;
-    const accessToken = sign(userData, jwtSecret, {algorithm: "HS256"});
+    const accessToken = sign(userData, jwtSecret, { algorithm: "HS256" });
     return accessToken;
+  }
+
+  public static async createUserTokens(userData: UserType): Promise<{
+    refreshToken: string;
+    accessToken: string;
+  }> {
+    const refreshToken = await this.createRefreshToken(userData.user_id!);
+    const accessToken = this.createAccessToken(userData);
+
+    return { refreshToken: refreshToken!, accessToken };
   }
 }
