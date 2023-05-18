@@ -61,7 +61,7 @@ export class AuthService {
 
   public static verifyAccessToken(accessToken: string): {
     status: boolean;
-    payload: JwtPayload | string;
+    payload: any;
   } {
     try {
       const jwtSecret = process.env.JWT_SECRET!;
