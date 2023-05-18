@@ -1,7 +1,7 @@
 import { RefreshTokenModel } from "../database/models/refreshToken";
 import { v4 } from "uuid";
 import { UserType } from "../database/types/types";
-import { sign } from "jsonwebtoken";
+import { sign, verify, JwtPayload } from "jsonwebtoken";
 
 export class AuthService {
   public static async createRefreshToken(
@@ -43,8 +43,42 @@ export class AuthService {
 
   public static createAccessToken(userData: UserType): string {
     const jwtSecret = process.env.JWT_SECRET!;
-    const accessToken = sign(userData, jwtSecret, { algorithm: "HS256" });
+    const jwtExpiresIn = Number(process.env.JWT_EXPRIRES_IN);
+    const accessToken = sign(
+      {
+        user_id: userData.user_id,
+        name: userData.name,
+        email: userData.email,
+      },
+      jwtSecret,
+      {
+        algorithm: "HS256",
+        expiresIn: jwtExpiresIn,
+      }
+    );
     return accessToken;
+  }
+
+  public static verifyAccessToken(accessToken: string): {
+    status: boolean;
+    payload: JwtPayload | string;
+  } {
+    try {
+      const jwtSecret = process.env.JWT_SECRET!;
+      const payload = verify(accessToken, jwtSecret, {
+        algorithms: ["HS256"],
+      });
+      return {
+        status: true,
+        payload,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: false,
+        payload: {},
+      };
+    }
   }
 
   public static async createUserTokens(userData: UserType): Promise<{
