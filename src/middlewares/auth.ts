@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { sign, verify } from "jsonwebtoken";
+import { AuthService } from "../services/auth";
+import { verify } from "jsonwebtoken";
 
 export class AuthMiddleware {
   public static async isAccessTokenVerified(
@@ -7,24 +8,32 @@ export class AuthMiddleware {
     res: Response,
     next: NextFunction
   ) {
+    const unauthorizedResponse = {
+      status: 403,
+      message: "Unauthorized",
+    };
+    const unauthenticatedResponse = {
+      status: 401,
+      message: "Unauthenticated",
+    };
+
     try {
-      const token = req.headers["x-access-token"];
+      const accessToken: string = req.headers["x-access-token"];
 
-      if (!token) {
-        return res.json({
-          status: 401,
-          message: "Unauthenticated"
-        });
+      if (!accessToken) {
+        return res.json(unauthenticatedResponse);
       }
-      const result = verify(String(token), String(process.env.JWT_SECRET));
 
-      req.user = result;
+      const accessTokenVerificationResult =
+        AuthService.verifyAccessToken(accessToken);
+
+      if (!accessTokenVerificationResult.status)
+        return res.json(unauthorizedResponse);
+
+      req.user = accessTokenVerificationResult.payload;
       next();
     } catch (error) {
-      res.json({
-        status: 403,
-        message: "Unauthorized"
-      });
+      return res.json(unauthorizedResponse);
     }
   }
 }
