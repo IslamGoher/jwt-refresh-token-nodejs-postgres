@@ -1,9 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { AuthService } from "../services/auth";
-import { verify } from "jsonwebtoken";
 
 export class AuthMiddleware {
-  public static async isAccessTokenVerified(
+  public static async isUserVerified(
     req: Request | any,
     res: Response,
     next: NextFunction
@@ -18,7 +17,7 @@ export class AuthMiddleware {
     };
 
     try {
-      const accessToken: string = req.headers["x-access-token"];
+      const accessToken: string = String(req.headers["x-access-token"]);
 
       if (!accessToken) {
         return res.json(unauthenticatedResponse);
