@@ -118,23 +118,26 @@ export class AuthController {
       if (!reqRefreshToken) return res.json(invalidTokenResponse);
 
       const accessTokenVerificationResult =
-        AuthService.verifyAccessToken(accessToken);
+        AuthService.verifyAccessToken(accessToken, true);
 
       if (!accessTokenVerificationResult.status)
         return res.json(invalidTokenResponse);
 
-      const accessTokenPayload: UserType = accessTokenVerificationResult.payload;
+      const accessTokenPayload: UserType =
+        accessTokenVerificationResult.payload;
 
-      const currentRefreshToken =
-        await RefreshTokenModel.getOneByUserIDAndToken(
+      const refreshTokenVerificationResult =
+        await AuthService.verifyRefreshToken(
           accessTokenPayload.user_id!,
           reqRefreshToken
         );
 
-      if (!currentRefreshToken)
+      if (!refreshTokenVerificationResult)
         return res.json(invalidTokenResponse);
 
-      const currentUser = await UserModel.getUserByID(accessTokenPayload.user_id!);
+      const currentUser = await UserModel.getUserByID(
+        accessTokenPayload.user_id!
+      );
 
       delete currentUser.password;
 
@@ -143,7 +146,7 @@ export class AuthController {
       return res.json({
         status: 200,
         message: "success",
-        token: newAccessToken
+        token: newAccessToken,
       });
     } catch (error) {
       console.error(error);

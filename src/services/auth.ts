@@ -59,7 +59,7 @@ export class AuthService {
     return accessToken;
   }
 
-  public static verifyAccessToken(accessToken: string): {
+  public static verifyAccessToken(accessToken: string, ignoreExpiration = false): {
     status: boolean;
     payload: any;
   } {
@@ -67,6 +67,7 @@ export class AuthService {
       const jwtSecret = process.env.JWT_SECRET!;
       const payload = verify(accessToken, jwtSecret, {
         algorithms: ["HS256"],
+        ignoreExpiration
       });
       return {
         status: true,
