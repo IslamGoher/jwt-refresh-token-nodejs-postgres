@@ -38,4 +38,13 @@ export class UserModel {
 
     return user[0];
   }
+
+  public static async getUserByID(user_id: number): Promise<UserType> {
+    const user: UserType[] = await Database.query<UserType>(
+      "SELECT * FROM users WHERE user_id = $1",
+      [user_id]
+    );
+
+    return user[0];
+  }
 }

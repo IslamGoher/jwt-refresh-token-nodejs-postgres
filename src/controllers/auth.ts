@@ -4,6 +4,9 @@ import { Validator } from "../helpers/validator";
 import { UserModel } from "../database/models/user";
 import { compare } from "bcrypt";
 import { AuthService } from "../services/auth";
+import { Utils } from "../helpers/utils";
+import { RefreshTokenModel } from "../database/models/refreshToken";
+import { UserType } from "../database/types/types";
 
 export class AuthController {
   public static async login(req: Request, res: Response) {
@@ -93,5 +96,64 @@ export class AuthController {
       message: "user successfully registered",
       token: accessToken,
     });
+  }
+
+  public static async refreshAccessToken(req: Request, res: Response) {
+    try {
+      const reqCookies = req.headers.cookie;
+      const accessToken = String(req.headers["x-access-token"]);
+
+      const invalidTokenResponse = {
+        status: 403,
+        message: "invalid token",
+      };
+
+      if (!reqCookies?.trim().replace(/ /g, ""))
+        return res.json(invalidTokenResponse);
+
+      if (!accessToken) return res.json(invalidTokenResponse);
+
+      const reqRefreshToken = Utils.parseCookie(reqCookies).rtoken;
+
+      if (!reqRefreshToken) return res.json(invalidTokenResponse);
+
+      const accessTokenVerificationResult =
+        AuthService.verifyAccessToken(accessToken, true);
+
+      if (!accessTokenVerificationResult.status)
+        return res.json(invalidTokenResponse);
+
+      const accessTokenPayload: UserType =
+        accessTokenVerificationResult.payload;
+
+      const refreshTokenVerificationResult =
+        await AuthService.verifyRefreshToken(
+          accessTokenPayload.user_id!,
+          reqRefreshToken
+        );
+
+      if (!refreshTokenVerificationResult)
+        return res.json(invalidTokenResponse);
+
+      const currentUser = await UserModel.getUserByID(
+        accessTokenPayload.user_id!
+      );
+
+      delete currentUser.password;
+
+      const newAccessToken = AuthService.createAccessToken(currentUser);
+
+      return res.json({
+        status: 200,
+        message: "success",
+        token: newAccessToken,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.json({
+        status: 500,
+        message: "server error",
+      });
+    }
   }
 }
