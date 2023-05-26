@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { loginDTO, registerDTO } from "../types/auth";
 import { Validator } from "../helpers/validator";
 import { UserModel } from "../database/models/user";
-import { compare } from "bcrypt";
+import { compare, hash } from "bcrypt";
 import { AuthService } from "../services/auth";
 import { Utils } from "../helpers/utils";
 import { RefreshTokenModel } from "../database/models/refreshToken";
@@ -80,7 +80,14 @@ export class AuthController {
         message: "this email already exists",
       });
 
-    const newUser = await UserModel.create(reqData);
+    const hashedPassword = await hash(reqData.password, 10);
+    const userData: UserType = {
+      email: reqData.email,
+      name: reqData.name,
+      password: hashedPassword,
+    };
+    const newUser = await UserModel.create(userData);
+    console.log({newUser});
 
     const { refreshToken, accessToken } = await AuthService.createUserTokens(
       newUser
