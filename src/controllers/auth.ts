@@ -87,7 +87,6 @@ export class AuthController {
       password: hashedPassword,
     };
     const newUser = await UserModel.create(userData);
-    console.log({newUser});
 
     const { refreshToken, accessToken } = await AuthService.createUserTokens(
       newUser
